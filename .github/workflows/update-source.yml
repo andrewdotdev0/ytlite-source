@@ -3,7 +3,7 @@ name: Update source from YTLiteDiarrhea releases
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 * * * *"   # cada hora
+    - cron: "0 * * * *"
 
 permissions:
   contents: write
@@ -16,11 +16,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
       - name: Fetch latest release
         id: release
         run: |
           curl -s https://api.github.com/repos/diarrhea3/YTLiteDiarrhea/releases/latest > latest.json
-          cat latest.json
 
           TAG_NAME=$(jq -r '.tag_name' latest.json)
           RELEASE_NAME=$(jq -r '.name // .tag_name' latest.json)
@@ -42,15 +44,11 @@ jobs:
           echo "ipa_name=$IPA_NAME" >> $GITHUB_OUTPUT
           echo "ipa_size=$IPA_SIZE" >> $GITHUB_OUTPUT
 
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
-
       - name: Update apps.json
         run: |
           python3 - <<'PY'
           import json
           from pathlib import Path
-          import os
 
           path = Path("docs/apps.json")
           data = json.loads(path.read_text(encoding="utf-8"))
@@ -59,36 +57,29 @@ jobs:
           release_name = "${{ steps.release.outputs.release_name }}"
           published_at = "${{ steps.release.outputs.published_at }}"
           ipa_url = "${{ steps.release.outputs.ipa_url }}"
-          ipa_name = "${{ steps.release.outputs.ipa_name }}"
           ipa_size = int("${{ steps.release.outputs.ipa_size }}")
 
           app = data["apps"][0]
           versions = app.setdefault("versions", [])
 
-          build_version = tag
-          version = release_name
-
           exists = any(
-              v.get("downloadURL") == ipa_url or v.get("buildVersion") == build_version
+              v.get("downloadURL") == ipa_url or v.get("buildVersion") == tag
               for v in versions
           )
 
-          if exists:
-              print("No changes needed; latest release already present.")
-              raise SystemExit(0)
+          if not exists:
+              versions.insert(0, {
+                  "version": release_name,
+                  "buildVersion": tag,
+                  "date": published_at,
+                  "downloadURL": ipa_url,
+                  "size": ipa_size
+              })
 
-          new_version = {
-              "version": version,
-              "buildVersion": build_version,
-              "date": published_at,
-              "downloadURL": ipa_url,
-              "size": ipa_size
-          }
-
-          versions.insert(0, new_version)
-
-          path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-          print("apps.json updated.")
+              path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+              print("Updated apps.json")
+          else:
+              print("Already up to date")
           PY
 
       - name: Commit changes
