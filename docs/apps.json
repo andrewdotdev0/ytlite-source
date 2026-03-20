@@ -9,7 +9,15 @@
       "localizedDescription": "Automatically updates based on `diarrhea3/YTLiteDiarrhea` releases.",
       "iconURL": "https://andrewdotdev0.github.io/ytlite-source/docs/icon.png",
       "tintColor": "#d11f1f",
-      "versions": []
+      "versions": [
+        {
+          "version": "21.11.4 YouTubePlus v5.2b4",
+          "buildVersion": "ytp-73",
+          "date": "2026-03-17T00:30:17Z",
+          "downloadURL": "https://github.com/diarrhea3/YTLiteDiarrhea/releases/download/ytp-73/21.11.4_YouTubePlus_5.2b4.ipa",
+          "size": 126401534
+        }
+      ]
     }
   ]
 }
