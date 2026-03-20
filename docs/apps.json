@@ -1,0 +1,14 @@
+{
+  "name": "YTLite Source",
+  "identifier": "com.andrewdotdev.ytlite.source",
+  "apps": [
+    {
+      "name": "YouTube",
+      "bundleIdentifier": "com.google.ios.youtube",
+      "developerName": "dayanch96",
+      "localizedDescription": "Automatically updates based on `diarrhea3/YTLiteDiarrhea` releases.",
+      "iconURL": "https://raw.githubusercontent.com/andrewdotdev0/YTLite-source/main/docs/icon.png",
+      "versions": []
+    }
+  ]
+}
